@@ -1,0 +1,159 @@
+version: "3.4"
+services:
+
+  # Database
+  microservices-mysql-db:
+    image: mysql:5.7
+    container_name: employee-mysql-db
+    hostname: employee-mysql-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'employee_db'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'willyoung'
+      MYSQL_ROOT_PASSWORD: 'willyoung'
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - microservices-db-volume:/var/lib/mysql
+    networks:
+      - microservices-app-network
+
+  # Core services
+  microservices-eureka-discovery:
+    hostname: microservices-eureka-discovery
+    image: kristen45/service-registry:latest
+    container_name: bookstore-consul-discovery
+    restart: always
+    ports:
+      - "8500:8500"
+    networks:
+      - microservices-app-network
+
+  bookstore-zuul-api-gateway-server:
+    build:
+      context: ./bookstore-api-gateway-service
+      args:
+        JAR_FILE: bookstore-api-gateway-service-0.0.1-SNAPSHOT.jar
+      dockerfile: Dockerfile
+    image: bookstore-zuul-api-gateway-server
+    container_name: bookstore-zuul-api-gateway-server
+    hostname: bookstore-zuul-api-gateway-server
+    ports:
+      - "8765:8765"
+    networks:
+      - microservices-app-network
+    environment:
+      - SERVER_PORT=8765
+      - ZIPKIN_HOST=bookstore-zipkin:9411
+      - SPRING_PROFILES_ACTIVE=docker
+
+  bookstore-account-service:
+    build:
+      context: ./bookstore-account-service
+      args:
+        JAR_FILE: bookstore-account-service-0.0.1-SNAPSHOT.jar
+      dockerfile: Dockerfile
+    image: bookstore-account-service
+    container_name: bookstore-account-service
+    hostname: bookstore-account-service
+    ports:
+      - "4001:4001"
+    networks:
+      - microservices-app-network
+    environment:
+      - SERVER_PORT=4001
+      - ZIPKIN_HOST=bookstore-zipkin:9411
+      - SPRING_PROFILES_ACTIVE=docker
+
+  bookstore-billing-service:
+    build:
+      context: ./bookstore-billing-service
+      args:
+        JAR_FILE: bookstore-billing-service-0.0.1-SNAPSHOT.jar
+      dockerfile: Dockerfile
+    image: bookstore-billing-service
+    container_name: bookstore-billing-service
+    hostname: bookstore-billing-service
+    ports:
+      - "5001:5001"
+    networks:
+      - microservices-app-network
+    environment:
+      - SERVER_PORT=5001
+      - ZIPKIN_HOST=bookstore-zipkin:9411
+      - SPRING_PROFILES_ACTIVE=docker
+
+  bookstore-catalog-service:
+    build:
+      context: ./bookstore-catalog-service
+      args:
+        JAR_FILE: bookstore-catalog-service-0.0.1-SNAPSHOT.jar
+      dockerfile: Dockerfile
+    image: bookstore-catalog-service
+    container_name: bookstore-catalog-service
+    hostname: bookstore-catalog-service
+    ports:
+      - "6001:6001"
+    networks:
+      - microservices-app-network
+    environment:
+      - SERVER_PORT=6001
+      - ZIPKIN_HOST=bookstore-zipkin:9411
+      - SPRING_PROFILES_ACTIVE=docker
+
+  bookstore-order-service:
+    build:
+      context: ./bookstore-order-service
+      args:
+        JAR_FILE: bookstore-order-service-0.0.1-SNAPSHOT.jar
+      dockerfile: Dockerfile
+    image: bookstore-order-service
+    container_name: bookstore-order-service
+    hostname: bookstore-order-service
+    ports:
+      - "7001:7001"
+    networks:
+      - microservices-app-network
+    environment:
+      - SERVER_PORT=7001
+      - ZIPKIN_HOST=bookstore-zipkin:9411
+      - SPRING_PROFILES_ACTIVE=docker
+
+  bookstore-payment-service:
+    build:
+      context: ./bookstore-payment-service
+      args:
+        JAR_FILE: bookstore-payment-service-0.0.1-SNAPSHOT.jar
+      dockerfile: Dockerfile
+    image: bookstore-payment-service
+    container_name: bookstore-payment-service
+    hostname: bookstore-payment-service
+    ports:
+      - "8001:8001"
+    networks:
+      - microservices-app-network
+    environment:
+      - SERVER_PORT=8001
+      - ZIPKIN_HOST=bookstore-zipkin:9411
+      - SPRING_PROFILES_ACTIVE=docker
+
+  # Tracing service
+  bookstore-zipkin:
+    image: openzipkin/zipkin
+    container_name: bookstore-zipkin
+    hostname: bookstore-zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - microservices-app-network
+
+volumes:
+  microservices-db-volume:
+
+
+networks:
+  microservices-app-network:
+    driver: bridge

@@ -13,11 +13,12 @@ class EmployeeService {
     }
 
     getEmployeeById(employeeId){
+        alert(123)
         return axios.get(EMPLOYEE_API_BASE_URL + '/' + employeeId);
     }
 
-    updateEmployee(employee, employeeId){
-        return axios.put(EMPLOYEE_API_BASE_URL + '/' + employeeId, employee);
+    updateEmployee(employeeDto, employeeId){
+        return axios.put(EMPLOYEE_API_BASE_URL + '/' + employeeId,employeeDto);
     }
 
     deleteEmployee(employeeId){

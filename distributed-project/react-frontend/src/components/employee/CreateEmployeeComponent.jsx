@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
-import EmployeeService from '../services/EmployeeService';
+import EmployeeService from '../../services/EmployeeService';
+import OrganizationService from '../../services/OrganizationService';
+import DepartmentService from '../../services/DepartmentService';
 
 class CreateEmployeeComponent extends Component {
     constructor(props) {
@@ -10,7 +12,11 @@ class CreateEmployeeComponent extends Component {
             id: this.props.match.params.id,
             firstName: '',
             lastName: '',
-            emailId: ''
+            email: '',
+            departmentCode:'',
+            organizationCode:'',
+            orgList:[],
+            devList:[]
         }
         this.changeFirstNameHandler = this.changeFirstNameHandler.bind(this);
         this.changeLastNameHandler = this.changeLastNameHandler.bind(this);
@@ -22,21 +28,37 @@ class CreateEmployeeComponent extends Component {
 
         // step 4
         if(this.state.id === '_add'){
-            return
+            OrganizationService.getOrgs().then( (res) =>{
+                let orgListdata = res.data;
+                
+                this.setState({
+                    organizationCode:orgListdata[0].organizationCode,
+                    orgList: orgListdata
+                });
+                console.log(orgListdata);
+            });
+            DepartmentService.getDeps().then( (res) =>{
+                let devListdata = res.data;
+                
+                this.setState({
+                    departmentCode:devListdata[0].departmentCode,
+                    devList: devListdata
+                });
+            });
         }else{
             EmployeeService.getEmployeeById(this.state.id).then( (res) =>{
                 let employee = res.data;
                 this.setState({firstName: employee.firstName,
                     lastName: employee.lastName,
-                    emailId : employee.emailId
+                    email : employee.email
                 });
             });
         }        
     }
     saveOrUpdateEmployee = (e) => {
         e.preventDefault();
-        let employee = {firstName: this.state.firstName, lastName: this.state.lastName, emailId: this.state.emailId};
-        console.log('employee => ' + JSON.stringify(employee));
+        let employee = {firstName: this.state.firstName,lastName: this.state.lastName, email: this.state.email,departmentCode: this.state.departmentCode,organizationCode:this.state.organizationCode};
+        
 
         // step 5
         if(this.state.id === '_add'){
@@ -59,7 +81,13 @@ class CreateEmployeeComponent extends Component {
     }
 
     changeEmailHandler= (event) => {
-        this.setState({emailId: event.target.value});
+        this.setState({email: event.target.value});
+    }
+    changeOrgHandler= (event) => {
+        this.setState({organizationCode: event.target.value});
+    }
+    changeDevHandler= (event) => {
+        this.setState({departmentCode: event.target.value});
     }
 
     cancel(){
@@ -93,12 +121,34 @@ class CreateEmployeeComponent extends Component {
                                         <div className = "form-group">
                                             <label> Last Name: </label>
                                             <input placeholder="Last Name" name="lastName" className="form-control" 
-                                                value={this.state.lastName} onChange={this.changeLastNameHandler}/>
+                                                 onChange={this.changeLastNameHandler}/>
                                         </div>
                                         <div className = "form-group">
                                             <label> Email Id: </label>
-                                            <input placeholder="Email Address" name="emailId" className="form-control" 
-                                                value={this.state.emailId} onChange={this.changeEmailHandler}/>
+                                            <input placeholder="Email Address" name="email" className="form-control" 
+                                                value={this.state.email} onChange={this.changeEmailHandler}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label> organization: </label>
+                                            <select className="form-control"  id="organization" value={this.state.organizationCode} onChange={this.changeOrgHandler}>
+                                            {this.state.orgList.map(org => (
+                                                <option 
+                                                value={org.organizationCode}
+                                                >{org.organizationName}</option>
+                                            ))}
+                                            </select>
+                    
+                                        </div>
+                                        <div className = "form-group">
+                                            <label> department: </label>
+                                            <select className="form-control"  id="department"  value={this.state.departmentCode} onChange={this.changeDevHandler}>
+                                            {this.state.devList.map(dev => (
+                                                <option
+                                                value={dev.departmentCode}
+                                                >{dev.departmentName}</option>
+                                            ))}
+                                            </select>
+                    
                                         </div>
 
                                         <button className="btn btn-success" onClick={this.saveOrUpdateEmployee}>Save</button>

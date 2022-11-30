@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import EmployeeService from '../services/EmployeeService'
+import EmployeeService from '../../services/EmployeeService'
+import OrganizationService from '../../services/OrganizationService'
 
 class ViewEmployeeComponent extends Component {
     constructor(props) {
@@ -7,14 +8,22 @@ class ViewEmployeeComponent extends Component {
 
         this.state = {
             id: this.props.match.params.id,
+            orgName:'',
+            depName:'',
             employee: {}
         }
     }
 
     componentDidMount(){
         EmployeeService.getEmployeeById(this.state.id).then( res => {
-            this.setState({employee: res.data.employee});
-        })
+            this.setState({
+                employee: res.data.employee,
+                orgName: res.data.organization.organizationName,
+                depName: res.data.department.departmentName
+            });
+        });
+        
+
     }
 
     render() {
@@ -35,6 +44,14 @@ class ViewEmployeeComponent extends Component {
                         <div className = "row">
                             <label> Employee Email: </label>
                             <div> { this.state.employee.email }</div>
+                        </div>
+                        <div className = "row">
+                            <label> organizaition: </label>
+                            <div> { this.state.orgName}</div>
+                        </div>
+                        <div className = "row">
+                            <label> department: </label>
+                            <div> { this.state.depName}</div>
                         </div>
                     </div>
 

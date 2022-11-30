@@ -7,5 +7,3 @@ CREATE TABLE organizations
     created_date             TIMESTAMP,
     CONSTRAINT pk_organizations PRIMARY KEY (id)
 );
-INSERT INTO organizations (id, organization_Name, organization_Code, organization_Description, created_Date)
-VALUES ('1','a', 'a', 'a', NOW());

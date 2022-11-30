@@ -10,4 +10,6 @@ public interface EmployeeService {
 
     APIResponseDto getEmployeeById(Long employeeId);
     List<EmployeeDto> findAll();
+    APIResponseDto updateEmploy(Long employeeId,EmployeeDto employeeDto);
+    String deleteEmploy(Long employeeId);
 }

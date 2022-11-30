@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import EmployeeService from '../services/EmployeeService'
+import EmployeeService from '../../services/EmployeeService'
 
 class ListEmployeeComponent extends Component {
     constructor(props) {
@@ -22,7 +22,7 @@ class ListEmployeeComponent extends Component {
         this.props.history.push(`/view-employee/${id}`);
     }
     editEmployee(id){
-        this.props.history.push(`/add-employee/${id}`);
+        this.props.history.push(`/update-employee/${id}`);
     }
 
     componentDidMount(){

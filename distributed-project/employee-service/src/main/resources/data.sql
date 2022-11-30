@@ -8,6 +8,3 @@ CREATE TABLE employees
     organization_code VARCHAR(255),
     CONSTRAINT pk_employees PRIMARY KEY (id)
 );
-
-INSERT INTO employees ( id, first_name, last_name, email, department_code, organization_code )
-VALUES ('1','a', 'a', 'a', 'a', 'a');

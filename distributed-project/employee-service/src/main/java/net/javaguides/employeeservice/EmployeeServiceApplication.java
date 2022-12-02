@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @SpringBootApplication
 @EnableFeignClients
-@EnableEurekaClient
+//@EnableEurekaClient
 public class EmployeeServiceApplication {
 
 //	@Bean
@@ -21,6 +21,7 @@ public class EmployeeServiceApplication {
 //	}
 
 	@Bean
+	@LoadBalanced
 	public WebClient webClient(){
 		return WebClient.builder().build();
 	}

@@ -1,20 +1,89 @@
 package net.javaguides.employeeservice.controller;
 
-import org.junit.jupiter.api.Test;
+import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.*;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.annotation.Resource;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class EmployeeControllerTest {
 
-    @Test
-    void getAllEmployees() {
+    @Resource
+    private MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp(WebApplicationContext wac) {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
     @Test
-    void saveEmployee() {
+    @Order(2)
+    void getAllEmployees() throws Exception {
+        this.mockMvc.perform(get("/api/employees"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].firstName").value("Jack"))
+                .andExpect(jsonPath("$[0].lastName").value("Smith"))
+                .andExpect(jsonPath("$[0].email").value("1234@gmail.com"))
+                .andExpect(jsonPath("$[0].departmentCode").value("MKT001"))
+                .andExpect(jsonPath("$[0].organizationCode").value("MKT"))
+                .andReturn();
     }
 
     @Test
-    void getEmployee() {
+    @Order(1)
+    void saveEmployee() throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", "3");
+        jsonObject.put("firstName", "Jack");
+        jsonObject.put("lastName", "Smith");
+        jsonObject.put("email", "1234@gmail.com");
+        jsonObject.put("departmentCode", "MKT001");
+        jsonObject.put("organizationCode", "MKT");
+        String json = jsonObject.toJSONString();
+
+        this.mockMvc.perform(post("/api/employees")
+                        .content(json)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.firstName").value("Jack"))
+                .andExpect(jsonPath("$.lastName").value("Smith"))
+                .andExpect(jsonPath("$.email").value("1234@gmail.com"))
+                .andExpect(jsonPath("$.departmentCode").value("MKT001"))
+                .andExpect(jsonPath("$.organizationCode").value("MKT"))
+                .andReturn();
+    }
+
+    @Test
+    @Order(3)
+    void getEmployee() throws Exception {
+        this.mockMvc.perform(get("/api/employees/1"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.employee.firstName").value("Jack"))
+                .andExpect(jsonPath("$.employee.lastName").value("Smith"))
+                .andExpect(jsonPath("$.employee.email").value("1234@gmail.com"))
+                .andExpect(jsonPath("$.employee.departmentCode").value("MKT001"))
+                .andExpect(jsonPath("$.employee.organizationCode").value("MKT"))
+                .andExpect(jsonPath("$.department.departmentName").value("R&D Department"))
+                .andExpect(jsonPath("$.department.departmentDescription").value("Research and Development Department"))
+                .andExpect(jsonPath("$.department.departmentCode").value("RD001"))
+                .andReturn();
     }
 }

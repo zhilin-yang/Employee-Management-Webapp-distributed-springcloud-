@@ -6,6 +6,7 @@ CREATE TABLE departments
     department_code        VARCHAR(255),
     CONSTRAINT pk_departments PRIMARY KEY (id)
 );
+INSERT INTO departments (department_name, department_description, department_code) VALUES ('Sales', 'Sales Department', 'SALES');
 
 
 

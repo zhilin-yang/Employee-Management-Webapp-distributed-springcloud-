@@ -9,4 +9,4 @@ CREATE TABLE employees
     CONSTRAINT pk_employees PRIMARY KEY (id)
 );
 INSERT INTO employees (first_name, last_name, email, department_code, organization_code)
-VALUES ('John', 'Doe', 'Doe', 'SALES', 'UCD');
+VALUES ('John', 'Doe', 'Doe', 'SALES', '1');

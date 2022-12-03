@@ -30,12 +30,12 @@ public class OrganizationController {
         return new ResponseEntity<>(savedOrganization, HttpStatus.CREATED);
     }
 
-//    // Build Get Organization by Code REST API
-//    @GetMapping("{code}")
-//    public ResponseEntity<OrganizationDto> getOrganization(@PathVariable("code") String organizationCode){
-//        OrganizationDto organizationDto = organizationService.getOrganizationByCode(organizationCode);
-//        return ResponseEntity.ok(organizationDto);
-//    }
+    // Build Get Organization by Code REST API
+    @GetMapping("/getOrgByCode/{code}")
+    public ResponseEntity<OrganizationDto> getOrganization(@PathVariable("code") String organizationCode){
+        OrganizationDto organizationDto = organizationService.getOrganizationByCode(organizationCode);
+        return ResponseEntity.ok(organizationDto);
+    }
     // Build Get Employee REST API
     @GetMapping("/{id}")
     public ResponseEntity<OrganizationDto> getOrg(@PathVariable("id") Long orgId){

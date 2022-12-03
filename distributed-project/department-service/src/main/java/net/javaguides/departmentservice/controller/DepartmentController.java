@@ -31,12 +31,12 @@ public class DepartmentController {
     }
 
     // Build get department rest api
-//    @GetMapping("{department-code}")
-//    public ResponseEntity<DepartmentDto> getDepartment(@PathVariable("department-code") String departmentCode){
-//        DepartmentDto departmentDto = departmentService.getDepartmentByCode(departmentCode);
-//        return new ResponseEntity<>(departmentDto, HttpStatus.OK
-//        );
-//    }
+    @GetMapping("/getDepByCode/{department-code}")
+    public ResponseEntity<DepartmentDto> getDepartment(@PathVariable("department-code") String departmentCode){
+        DepartmentDto departmentDto = departmentService.getDepartmentByCode(departmentCode);
+        return new ResponseEntity<>(departmentDto, HttpStatus.OK
+        );
+    }
 
     // Build Get Employee REST API
     @GetMapping("/{id}")

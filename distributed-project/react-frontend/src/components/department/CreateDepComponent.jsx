@@ -92,15 +92,16 @@ class CreateDepComponent extends Component {
                                             <input placeholder="department Code" name="departmentCode" className="form-control" 
                                                 value={this.state.departmentCode} onChange={this.changedepCodeHandler}/>
                                         </div>
-                                        <div className = "form-group">
-                                            <label> department description: </label>
-                                            <input placeholder="department description" name="departmentDescription" className="form-control" 
-                                                 value={this.state.departmentDescription}  onChange={this.changedepDesHandler}/>
-                                        </div>
+                                       
                                         <div className = "form-group">
                                             <label> department name: </label>
                                             <input placeholder="department name" name="departmentName" className="form-control" 
                                                 value={this.state.departmentName} onChange={this.changedepNameHandler}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label> department description: </label>
+                                            <input placeholder="department description" name="departmentDescription" className="form-control" 
+                                                 value={this.state.departmentDescription}  onChange={this.changedepDesHandler}/>
                                         </div>
 
                                         <button className="btn btn-success" onClick={this.saveOrUpdateDep}>Save</button>

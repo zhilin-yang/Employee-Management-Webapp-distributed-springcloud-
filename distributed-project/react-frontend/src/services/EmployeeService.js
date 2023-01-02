@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const EMPLOYEE_API_BASE_URL = "http://localhost:9191/api/employees";
+const EMPLOYEE_API_BASE_URL = "http://localhost:9191/api/employeeman/employees";
 
 class EmployeeService {
 
@@ -23,6 +23,10 @@ class EmployeeService {
 
     deleteEmployee(employeeId){
         return axios.delete(EMPLOYEE_API_BASE_URL + '/' + employeeId);
+    }
+    searchEm(firstName){
+        return axios.get(EMPLOYEE_API_BASE_URL + '/searchEmp/' + firstName);
+
     }
 }
 

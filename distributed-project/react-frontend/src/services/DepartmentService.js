@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const DEPARTMENT_API_BASE_URL = "http://localhost:9191/api/departments";
+const DEPARTMENT_API_BASE_URL = "http://localhost:9191/api/employeeman/departments";
 
 class DepartmentService {
 
@@ -8,7 +8,6 @@ class DepartmentService {
         return axios.get(DEPARTMENT_API_BASE_URL);
     }
     createDep(dep){
-        alert(123)
         return axios.post(DEPARTMENT_API_BASE_URL, dep);
     }
 

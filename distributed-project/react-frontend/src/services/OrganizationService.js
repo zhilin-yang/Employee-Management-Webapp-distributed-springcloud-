@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const Org_API_BASE_URL = "http://localhost:9191/api/organizations";
+const Org_API_BASE_URL = "http://localhost:9191/api/employeeman/organizations";
 
 
 class OrganizationService {

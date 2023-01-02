@@ -25,7 +25,7 @@ class UpdateEmployeeComponent extends Component {
     componentDidMount(){
         EmployeeService.getEmployeeById(this.state.id).then( (res) =>{
             let employee = res.data.employee;
-            let department = res.data.department;
+            let department = res.data.departmentDto;
             let organization = res.data.organization;
             this.setState({firstName: employee.firstName,
                 lastName: employee.lastName,
@@ -101,7 +101,7 @@ class UpdateEmployeeComponent extends Component {
                                                 value={this.state.lastName} onChange={this.changeLastNameHandler}/>
                                         </div>
                                         <div className = "form-group">
-                                            <label> Email Id: </label>
+                                            <label> Email: </label>
                                             <input placeholder="Email Address" name="email" className="form-control" 
                                                 value={this.state.email} onChange={this.changeEmailHandler}/>
                                         </div>

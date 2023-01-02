@@ -111,7 +111,7 @@ class CreateEmployeeComponent extends Component {
                                 {
                                     this.getTitle()
                                 }
-                                <div className = "card-body">
+                                <div >
                                     <form>
                                         <div className = "form-group">
                                             <label> First Name: </label>
@@ -124,7 +124,7 @@ class CreateEmployeeComponent extends Component {
                                                  onChange={this.changeLastNameHandler}/>
                                         </div>
                                         <div className = "form-group">
-                                            <label> Email Id: </label>
+                                            <label> Email: </label>
                                             <input placeholder="Email Address" name="email" className="form-control" 
                                                 value={this.state.email} onChange={this.changeEmailHandler}/>
                                         </div>
@@ -150,7 +150,7 @@ class CreateEmployeeComponent extends Component {
                                             </select>
                     
                                         </div>
-
+ 
                                         <button className="btn btn-success" onClick={this.saveOrUpdateEmployee}>Save</button>
                                         <button className="btn btn-danger" onClick={this.cancel.bind(this)} style={{marginLeft: "10px"}}>Cancel</button>
                                     </form>

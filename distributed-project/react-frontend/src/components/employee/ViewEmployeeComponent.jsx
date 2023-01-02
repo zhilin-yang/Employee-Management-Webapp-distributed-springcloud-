@@ -19,7 +19,7 @@ class ViewEmployeeComponent extends Component {
             this.setState({
                 employee: res.data.employee,
                 orgName: res.data.organization.organizationName,
-                depName: res.data.department.departmentName
+                depName: res.data.departmentDto.departmentName
             });
         });
         

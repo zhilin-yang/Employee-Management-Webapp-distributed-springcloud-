@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import OrganizationService from '../../services/OrganizationService'
+import { Link } from 'react-router-dom';
 
 class ListOrgComponent extends Component {
     constructor(props) {
@@ -38,6 +39,18 @@ class ListOrgComponent extends Component {
     render() {
         return (
             <div>
+                <div style={{marginTop: '20px',marginBottom: '30px',borderBottom: '1px solid black',boxShadow: '0px 1px 1px #dee2e6',borderColor:'#dee2e6'}}>
+            
+            <div style={{display: 'inline-block', backgroundColor: '#497BFF', borderRadius: '10px 10px 0 0',width: '130px', height: '35px',textAlign: 'center',fontWeight: 'bold',lineHeight: '35px'}}>
+                <Link to="/employees" ><span style={{color: '#666'}}>Employee</span></Link>
+            </div>
+            <div style={{display: 'inline-block', backgroundColor: '#42A2B8', borderRadius: '10px 10px 0 0',width: '130px', height: '35px',textAlign: 'center',fontWeight: 'bold',lineHeight: '35px'}}>
+                <Link to='/department'><span style={{color: '#666'}}>Department</span></Link>
+            </div>
+            <div style={{display: 'inline-block',backgroundColor: '#F4F4F4', borderRadius: '10px 10px 0 0',width: '130px', height: '35px',textAlign: 'center',fontWeight: 'bold',lineHeight: '35px'}}>
+                <Link to='/organization'><span style={{color: '#666'}}>Organization</span></Link>
+            </div>
+       </div>
                  <h2 className="text-center">Organization List</h2>
                  <div className = "row">
                     <button className="btn btn-primary" onClick={this.addOrg}> Add Organization</button>
@@ -48,9 +61,9 @@ class ListOrgComponent extends Component {
 
                             <thead>
                                 <tr>
+                                    <th> Organization Code</th>
                                     <th> Organization Name</th>
                                     <th> Organization Description</th>
-                                    <th> Organization Code</th>
                                     <th> Actions</th>
                                 </tr>
                             </thead>
@@ -59,10 +72,10 @@ class ListOrgComponent extends Component {
                                     this.state.orgs.map(
                                         org => 
                                         <tr key = {org.id}>
+                                             <td> {org.organizationCode}</td>
                                              <td> { org.organizationName} </td>   
                                              <td> {org.organizationDescription}</td>
-                                             <td> {org.organizationCode}</td>
-                                             <td>
+                                             <td style={{width:'280px'}}>
                                                  <button onClick={ () => this.editOrg(org.id)} className="btn btn-info">Update </button>
                                                  <button style={{marginLeft: "10px"}} onClick={ () => this.deleteOrg(org.id)} className="btn btn-danger">Delete </button>
                                                  <button style={{marginLeft: "10px"}} onClick={ () => this.viewOrg(org.id)} className="btn btn-info">View </button>

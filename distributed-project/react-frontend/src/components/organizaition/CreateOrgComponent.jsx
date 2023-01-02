@@ -92,15 +92,16 @@ class CreateOrgComponent extends Component {
                                             <input placeholder="Organization Code" name="organizationCode" className="form-control" 
                                                 value={this.state.organizationCode} onChange={this.changeOrgCodeHandler}/>
                                         </div>
-                                        <div className = "form-group">
-                                            <label> Organization description: </label>
-                                            <input placeholder="Organization description" name="organizationDescription" className="form-control" 
-                                                 value={this.state.organizationDescription}  onChange={this.changeOrgDesHandler}/>
-                                        </div>
+                                        
                                         <div className = "form-group">
                                             <label> Organization name: </label>
                                             <input placeholder="Organization name" name="organizationName" className="form-control" 
                                                 value={this.state.organizationName} onChange={this.changeOrgNameHandler}/>
+                                        </div>
+                                        <div className = "form-group">
+                                            <label> Organization description: </label>
+                                            <input placeholder="Organization description" name="organizationDescription" className="form-control" 
+                                                 value={this.state.organizationDescription}  onChange={this.changeOrgDesHandler}/>
                                         </div>
 
                                         <button className="btn btn-success" onClick={this.saveOrUpdateOrg}>Save</button>

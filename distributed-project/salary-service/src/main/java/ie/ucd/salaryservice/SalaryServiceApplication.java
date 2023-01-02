@@ -1,0 +1,18 @@
+package ie.ucd.salaryservice;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
+
+
+@SpringBootApplication
+@EnableEurekaClient
+public class SalaryServiceApplication {
+
+
+	public static void main(String[] args) {
+
+		SpringApplication.run(SalaryServiceApplication.class, args);
+	}
+
+}

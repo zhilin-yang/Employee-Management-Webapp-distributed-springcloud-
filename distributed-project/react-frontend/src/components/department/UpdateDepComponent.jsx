@@ -63,17 +63,18 @@ class UpdateDepComponent extends Component {
                                         <div className = "form-group">
                                             <label> Department Code: </label>
                                             <input placeholder="department Code" name="departmentCode" className="form-control" 
-                                                value={this.state.departmentCode} onChange={this.changedepCodeHandler}/>
+                                                value={this.state.departmentCode} onChange={this.changedepCodeHandler} disabled/>
+                                        </div>
+                                        
+                                        <div className = "form-group">
+                                            <label> Department Name: </label>
+                                            <input placeholder="department name" name="departmentName" className="form-control" 
+                                                value={this.state.departmentName} onChange={this.changedepNameHandler}/>
                                         </div>
                                         <div className = "form-group">
                                             <label>Department Description: </label>
                                             <input placeholder="department description" name="departmentDescription" className="form-control" 
                                                 value={this.state.departmentDescription} onChange={this.changedepDesHandler}/>
-                                        </div>
-                                        <div className = "form-group">
-                                            <label> Department Name: </label>
-                                            <input placeholder="department name" name="departmentName" className="form-control" 
-                                                value={this.state.departmentName} onChange={this.changedepNameHandler}/>
                                         </div>
                                        
 

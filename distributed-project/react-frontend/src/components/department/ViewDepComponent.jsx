@@ -31,13 +31,14 @@ class ViewDepComponent extends Component {
                             <label> department Code: </label>
                             <div> { this.state.dep.departmentCode }</div>
                         </div>
-                        <div className = "row">
-                            <label> department description: </label>
-                            <div> { this.state.dep.departmentDescription}</div>
-                        </div>
+                        
                         <div className = "row">
                             <label> department name: </label>
                             <div> { this.state.dep.departmentName }</div>
+                        </div>
+                        <div className = "row">
+                            <label> department description: </label>
+                            <div> { this.state.dep.departmentDescription}</div>
                         </div>
                        
                     </div>

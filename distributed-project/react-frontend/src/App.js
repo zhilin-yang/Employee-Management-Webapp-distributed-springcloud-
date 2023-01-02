@@ -18,6 +18,19 @@ import CreateOrgComponent from './components/organizaition/CreateOrgComponent';
 import UpdateOrgComponent from './components/organizaition/UpdateOrgComponent';
 import ViewOrgComponent from './components/organizaition/ViewOrgComponent';
 
+import LoginComponent from './components/user/LoginComponent';
+import SigninComponent from './components/user/SigninComponent';
+import AuthRoute from './components/AuthRoute';
+import userDetailComponent from './components/user/userDetailComponent';
+import changePComponent from './components/user/changePComponent';
+
+import ListSalaryComponent from "./components/salary/ListSalaryComponent";
+import CreateSalaryComponent from './components/salary/CreateSalaryComponent';
+import UpdateSalaryComponent from './components/salary/UpdateSalaryComponent';
+import ViewSalaryComponent from './components/salary/ViewSalaryComponent';
+
+
+
 
 function App() {
   return (
@@ -26,28 +39,38 @@ function App() {
               <HeaderComponent />
                 <div className="container">
                     <Switch> 
-                          <Route path = "/" exact component = {ListEmployeeComponent}></Route>
-                          <Route path = "/employees" component = {ListEmployeeComponent}></Route>
-                          <Route path = "/add-employee/:id" component = {CreateEmployeeComponent}></Route>
-                          <Route path = "/update-employee/:id" component = {UpdateEmployeeComponent}></Route>
-                          <Route path = "/view-employee/:id" component = {ViewEmployeeComponent}></Route>
+                          <AuthRoute path = "/" exact component = {ListEmployeeComponent}></AuthRoute>
+                          <AuthRoute path = "/employees" component = {ListEmployeeComponent}></AuthRoute>
+                          <AuthRoute path = "/add-employee/:id" component = {CreateEmployeeComponent}></AuthRoute>
+                          <AuthRoute path = "/update-employee/:id" component = {UpdateEmployeeComponent}></AuthRoute>
+                          <AuthRoute path = "/view-employee/:id" component = {ViewEmployeeComponent}></AuthRoute>
                           {/* <Route path = "/update-employee/:id" component = {UpdateEmployeeComponent}></Route> */}
 
-                          <Route path = "/department" exact component = {ListDepComponent}></Route>
-                          <Route path = "/deps" component = {ListDepComponent}></Route>
-                          <Route path = "/add-dep/:id" component = {CreateDepComponent}></Route>
-                          <Route path = "/update-dep/:id" component = {UpdateDepComponent}></Route>
-                          <Route path = "/view-dep/:id" component = {ViewDepComponent}></Route>
+                          <AuthRoute path = "/department" exact component = {ListDepComponent}></AuthRoute>
+                          <AuthRoute path = "/deps" component = {ListDepComponent}></AuthRoute>
+                          <AuthRoute path = "/add-dep/:id" component = {CreateDepComponent}></AuthRoute>
+                          <AuthRoute path = "/update-dep/:id" component = {UpdateDepComponent}></AuthRoute>
+                          <AuthRoute path = "/view-dep/:id" component = {ViewDepComponent}></AuthRoute>
                           {/* <Route path = "/update-employee/:id" component = {UpdateEmployeeComponent}></Route> */}
 
-                          <Route path = "/organization" exact component = {ListOrgComponent}></Route>
-                          <Route path = "/orgs" component = {ListOrgComponent}></Route>
-                          <Route path = "/add-org/:id" component = {CreateOrgComponent}></Route>
-                          <Route path = "/update-org/:id" component = {UpdateOrgComponent}></Route>
-                          <Route path = "/view-org/:id" component = {ViewOrgComponent}></Route>
+                          <AuthRoute path = "/organization" exact component = {ListOrgComponent}></AuthRoute>
+                          <AuthRoute path = "/orgs" component = {ListOrgComponent}></AuthRoute>
+                          <AuthRoute path = "/add-org/:id" component = {CreateOrgComponent}></AuthRoute>
+                          <AuthRoute path = "/update-org/:id" component = {UpdateOrgComponent}></AuthRoute>
+                          <AuthRoute path = "/view-org/:id" component = {ViewOrgComponent}></AuthRoute>
                           {/* <Route path = "/update-org/:id" component = {UpdateOrgComponent}></Route> */}
 
-
+                          <Route path = "/LoginForm" exact component = {LoginComponent}></Route>
+                          <Route path = "/SigninForm" exact component = {SigninComponent}></Route>
+                          <AuthRoute path = "/userDetail" component = {userDetailComponent}></AuthRoute>
+                          <AuthRoute path = "/change-password/:email" component = {changePComponent}></AuthRoute>
+                          
+                          <AuthRoute path = "/salary" exact component = {ListSalaryComponent}></AuthRoute>
+                          <AuthRoute path = "/salaries" component = {ListSalaryComponent}></AuthRoute>
+                          <AuthRoute path = "/add-salary/:id" component = {CreateSalaryComponent}></AuthRoute>
+                          <AuthRoute path = "/update-salary/:id" component = {UpdateSalaryComponent}></AuthRoute>
+                          <AuthRoute path = "/view-salary/:id" component = {ViewSalaryComponent}></AuthRoute>
+                          
                     </Switch>
                 </div>
         </Router>

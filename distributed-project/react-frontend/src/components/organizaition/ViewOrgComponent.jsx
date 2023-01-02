@@ -33,13 +33,14 @@ class ViewOrgComponent extends Component {
                             <div> { this.state.org.organizationCode }</div>
                         </div>
                         <div className = "row">
-                            <label> Organization description: </label>
-                            <div> { this.state.org.organizationDescription}</div>
-                        </div>
-                        <div className = "row">
                             <label> Organization name: </label>
                             <div> { this.state.org.organizationName }</div>
                         </div>
+                        <div className = "row">
+                            <label> Organization description: </label>
+                            <div> { this.state.org.organizationDescription}</div>
+                        </div>
+                       
                        
                     </div>
 

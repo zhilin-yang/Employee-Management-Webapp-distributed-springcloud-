@@ -55,33 +55,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Retry(name = "${spring.application.name}", fallbackMethod = "getDefaultDepartment")
     @Override
     public APIResponseDto getEmployeeById(Long employeeId) {
-
-
         LOGGER.info("inside getEmployeeById() method");
         Employee employee = employeeRepository.findById(employeeId).get();
-        System.out.print(employee.getOrganizationCode()+"================================");
-//        ResponseEntity<DepartmentDto> responseEntity = restTemplate.getForEntity("http://DEPARTMENT-SERVICE/api/departments/" + employee.getDepartmentCode(),
-//                DepartmentDto.class);
-//
-//        DepartmentDto departmentDto = responseEntity.getBody();
+
           Department department = departmentRepository.findByDepartmentCode(employee.getDepartmentCode());
           DepartmentDto departmentDto= DepartmentMapper.mapToDepartmentDto(department);
           Organization organization=organizationRepository.findByOrganizationCode(employee.getOrganizationCode());
           OrganizationDto organizationDto=OrganizationMapper.mapToOrganizationDto(organization);
-//        DepartmentDto departmentDto = webClient.get()
-//                .uri("http://localhost:9191/api/departments/getDepByCode/" + employee.getDepartmentCode())
-//                .retrieve()
-//                .bodyToMono(DepartmentDto.class)
-//                .block();
-//        System.out.print(departmentDto.getDepartmentName()+"=======De=========================");
-//      //  DepartmentDto departmentDto = apiClient.getDepartment(employee.getDepartmentCode());
-//
-//        OrganizationDto organizationDto = webClient.get()
-//                .uri("http://localhost:9191/api/organizations/getOrgByCode/" + employee.getOrganizationCode())
-//                .retrieve()
-//                .bodyToMono(OrganizationDto.class)
-//                .block();
-//        System.out.print(organizationDto.getOrganizationName()+"===============Or=================");
 
         EmployeeDto employeeDto = EmployeeMapper.mapToEmployeeDto(employee);
 
@@ -93,7 +73,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
     @Override
     public APIResponseDto updateEmploy(Long employeeId,EmployeeDto employeeDto){
-        System.out.print("update--------------------------------------------");
         LOGGER.info("inside updateEmploy() method");
         Employee employee = employeeRepository.findById(employeeId).get();
         employee.setFirstName(employeeDto.getFirstName());
@@ -109,19 +88,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         DepartmentDto departmentDto=DepartmentMapper.mapToDepartmentDto(department);
         Organization organization=organizationRepository.findByOrganizationCode(employee.getOrganizationCode());
         OrganizationDto organizationDto=OrganizationMapper.mapToOrganizationDto(organization);
-//        DepartmentDto departmentDto = webClient.get()
-//                .uri("http://localhost:9191/api/departments/getDepByCode/" + employee.getDepartmentCode())
-//                .retrieve()
-//                .bodyToMono(DepartmentDto.class)
-//                .block();
-//
-//        //  DepartmentDto departmentDto = apiClient.getDepartment(employee.getDepartmentCode());
-//
-//        OrganizationDto organizationDto = webClient.get()
-//                .uri("http://localhost:9191/api/organizations/getOrgByCode/" + employee.getOrganizationCode())
-//                .retrieve()
-//                .bodyToMono(OrganizationDto.class)
-//                .block();
         apiResponseDto.setDepartmentDto(departmentDto);
         apiResponseDto.setOrganization(organizationDto);
         return apiResponseDto;
@@ -179,4 +145,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         return empListDto;
 
     }
+
+    @Override
+    public EmployeeDto getEmployeeByEmail(String email) {
+        Employee emp=employeeRepository.findByEmail(email);
+        if(emp!=null){
+            EmployeeDto empDto=EmployeeMapper.mapToEmployeeDto(emp);
+            return empDto;
+        }else{
+            return null;
+        }
+
+
+    }
+
 }

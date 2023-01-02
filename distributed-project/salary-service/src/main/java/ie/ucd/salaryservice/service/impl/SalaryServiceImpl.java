@@ -1,5 +1,7 @@
 package ie.ucd.salaryservice.service.impl;
 
+import ie.ucd.salaryservice.dto.EmployeeDto;
+import ie.ucd.salaryservice.feign.EmployeeManClient;
 import ie.ucd.salaryservice.service.SalaryService;
 import lombok.AllArgsConstructor;
 import ie.ucd.salaryservice.dto.SalaryDto;
@@ -22,6 +24,7 @@ public class SalaryServiceImpl implements SalaryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SalaryServiceImpl.class);
 
     private SalaryRepository salaryRepository;
+    private EmployeeManClient employeeManClient;
 
     @Override
     public SalaryDto saveSalary(SalaryDto salaryDto) {
@@ -69,5 +72,19 @@ public class SalaryServiceImpl implements SalaryService {
             salaryListDto.add(SalaryMapper.mapToSalaryDto(salaryListEn.get(i)));
         }
         return salaryListDto;
+    }
+
+    @Override
+    public SalaryDto findSalaryByEmail(String email) {
+        EmployeeDto employeeDto = employeeManClient.getEmployee(email);
+        if(employeeDto!=null){
+            Long employeeId = employeeDto.getId();
+
+            SalaryDto salaryDto = getSalaryByEmployeeId(employeeId);
+            return salaryDto;
+        }else{
+            return null;
+        }
+
     }
 }

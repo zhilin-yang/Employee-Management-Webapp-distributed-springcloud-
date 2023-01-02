@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -44,5 +45,17 @@ public class SalaryController {
     public ResponseEntity<SalaryDto> updateSalary(@RequestBody SalaryDto salaryDto, @PathVariable("employee-id") Long id) {
         SalaryDto savedSalary = salaryService.updateSalary(salaryDto, id);
         return new ResponseEntity<>(savedSalary, HttpStatus.OK);
+    }
+
+    @GetMapping("/getCurrentEmp/{email}")
+    public ResponseEntity<List<SalaryDto>>  getSalaryByEmail(@PathVariable("email") String email){
+        List<SalaryDto> salaryDtoList=new ArrayList<>();
+        SalaryDto salaryDto=salaryService.findSalaryByEmail(email);
+        if(salaryDto!=null){
+            salaryDtoList.add(salaryDto);
+
+        }
+
+        return new ResponseEntity<>(salaryDtoList, HttpStatus.OK);
     }
 }

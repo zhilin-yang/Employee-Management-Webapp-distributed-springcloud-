@@ -13,4 +13,5 @@ public interface EmployeeService {
     APIResponseDto updateEmploy(Long employeeId,EmployeeDto employeeDto);
     String deleteEmploy(Long employeeId);
     List<EmployeeDto>findAllByFirstName(String firstNameLike);
+    EmployeeDto getEmployeeByEmail(String email);
 }

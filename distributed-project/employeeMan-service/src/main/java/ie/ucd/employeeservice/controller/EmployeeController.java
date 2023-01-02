@@ -30,7 +30,6 @@ public class EmployeeController {
     @GetMapping("/searchEmp/{firstNamecheck}")
     public ResponseEntity <List<EmployeeDto>> getAllEmployeesByFN(@PathVariable("firstNamecheck") String firstNamecheck){
         List <EmployeeDto> empListDto=new ArrayList<>();
-        System.out.print(firstNamecheck);
         if(firstNamecheck.equals("")){
             empListDto=employeeService.findAll();
         }else{
@@ -67,6 +66,13 @@ public class EmployeeController {
         response.put("deleted", Boolean.TRUE);
         return ResponseEntity.ok(response);
     }
+    // Build Get Employee REST API
+    @GetMapping("getEmpByEmail/{email}")
+    public ResponseEntity<EmployeeDto> getEmployeeByEmail(@PathVariable("email") String email){
+        EmployeeDto employeeDto = employeeService.getEmployeeByEmail(email);
+        return new ResponseEntity<>(employeeDto, HttpStatus.OK);
+    }
+
 
 
 }

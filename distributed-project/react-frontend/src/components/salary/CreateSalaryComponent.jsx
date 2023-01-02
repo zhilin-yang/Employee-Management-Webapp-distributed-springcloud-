@@ -64,9 +64,9 @@ class CreateSalaryComponent extends Component {
         });
     }
     changeEmployeeInfoHandler= (event) => {
-        this.setState({employeeID: event.target.value.split('-')[0]});
-        this.setState({firstName: event.target.value.split('-')[1].split(' ')[0]});
-        this.setState({lastName: event.target.value.split('-')[1].split(' ')[1]});
+        this.state.employeeId=event.target.value.split('-')[0];
+        this.state.firstName=event.target.value.split('-')[1].split(' ')[0];
+        this.state.lastName= event.target.value.split('-')[1].split(' ')[1];
     }
     
     changeBaseSalaryHandler= (event) => {
@@ -107,11 +107,10 @@ class CreateSalaryComponent extends Component {
                                         <div className = "form-group">
                                             <label> Employee Information: </label>
                                             <select className="form-control"  id="employeeInfo"
-                                                    value={this.state.employeeId + "-" + this.state.firstName + " "
-                                                        + this.state.lastName} onChange={this.changeEmployeeInfoHandler}>
+                                                     onChange={this.changeEmployeeInfoHandler}>
                                                 {this.state.employeeList.map(employee => (
                                                     <option
-                                                        value={employee.id}
+                                                        value={employee.id + "-" + employee.firstName + " " + employee.lastName}
                                                     >{employee.id + "-" + employee.firstName + " " + employee.lastName}</option>
                                                 ))}
                                             </select>

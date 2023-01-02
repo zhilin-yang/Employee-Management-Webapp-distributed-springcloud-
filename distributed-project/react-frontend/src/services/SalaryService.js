@@ -4,8 +4,14 @@ const Salary_API_BASE_URL = "http://localhost:9191/api/salaries";
 
 class SalaryService {
 
-    getSalaries(){
-        return axios.get(Salary_API_BASE_URL);
+    getSalaries(role,email){
+        if(role==0){
+            return axios.get(Salary_API_BASE_URL);
+
+        }else{
+            return axios.get(Salary_API_BASE_URL+'/getCurrentEmp/'+email);
+        }
+        
     }
 
     createSalary(salary){

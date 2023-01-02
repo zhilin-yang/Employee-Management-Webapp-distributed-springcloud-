@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto saveUser(UserDto userDto) {
         User user = UserMapper.mapToUser(userDto);
-        user.setRole(0);
+        user.setRole(1);
         User saveUser = userRepository.save(user);
 
         UserDto savedUserDto = UserMapper.mapToUserDto(saveUser);

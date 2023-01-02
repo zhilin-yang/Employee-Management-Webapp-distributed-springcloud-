@@ -1,12 +1,16 @@
 import React, { Component } from 'react'
 import SalaryService from '../../services/SalaryService'
+import jwt from '../user/jwt';
 
 class ListSalaryComponent extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
-                salaries: []
+                salaries: [],
+                role:jwt.getRole(),
+                email:jwt.getEmail()
+
         }
         this.addSalary = this.addSalary.bind(this);
         this.editSalary = this.editSalary.bind(this);
@@ -28,7 +32,7 @@ class ListSalaryComponent extends Component {
     }
 
     componentDidMount(){
-        SalaryService.getSalaries().then((res) => {
+        SalaryService.getSalaries(this.state.role,this.state.email).then((res) => {
             this.setState({salaries: res.data});
         });
     }
@@ -42,7 +46,8 @@ class ListSalaryComponent extends Component {
             <div>
                  <h2 className="text-center">Salary List</h2>
                  <div className = "row">
-                    <button className="btn btn-primary" onClick={this.addSalary}> Add Salary</button>
+                 {this.state.role==0 ?  <button className="btn btn-primary" onClick={this.addSalary}> Add Salary</button>:null}
+                    
                  </div>
                  <br></br>
                  <div className = "row">
@@ -71,8 +76,10 @@ class ListSalaryComponent extends Component {
                                              <td> {salary.overtimePay} </td>
                                              <td> {salary.bonus} </td>
                                              <td>
-                                                 <button onClick={ () => this.editSalary(salary.employeeId)} className="btn btn-info">Update </button>
-                                                 <button style={{marginLeft: "10px"}} onClick={ () => this.deleteSalary(salary.employeeId)} className="btn btn-danger">Delete </button>
+                                             {this.state.role==0 ?  <button onClick={ () => this.editSalary(salary.employeeId)} className="btn btn-info">Update </button>:null}
+                                             {this.state.role==0 ?  <button style={{marginLeft: "10px"}} onClick={ () => this.deleteSalary(salary.employeeId)} className="btn btn-danger">Delete </button>:null}
+                                                 
+                                                 
                                                  <button style={{marginLeft: "10px"}} onClick={ () => this.viewSalary(salary.employeeId)} className="btn btn-info">View </button>
                                              </td>
                                         </tr>

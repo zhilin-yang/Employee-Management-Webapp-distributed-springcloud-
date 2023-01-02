@@ -10,4 +10,5 @@ import java.util.List;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     @Query("SELECT e FROM Employee e WHERE e.firstName LIKE %:firstNameCheck%")
     List<Employee> findByFirstNameLike(@Param("firstName") String firstNameCheck);
+    Employee findByEmail(String email);
 }

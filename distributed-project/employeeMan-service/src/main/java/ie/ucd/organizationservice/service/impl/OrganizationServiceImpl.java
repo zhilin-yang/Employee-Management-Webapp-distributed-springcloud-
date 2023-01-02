@@ -46,12 +46,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
     @Override
     public OrganizationDto getOrgById(Long orgId) {
-        System.out.print("getId===============================");
         Organization org = organizationRepository.findById(orgId).get();
-
         OrganizationDto orgDto = OrganizationMapper.mapToOrganizationDto(org);
-
-
         return orgDto;
     }
     @Override

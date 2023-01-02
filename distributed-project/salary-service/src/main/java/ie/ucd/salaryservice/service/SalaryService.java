@@ -10,4 +10,5 @@ public interface SalaryService {
     void deleteSalaryByEmployeeId(Long employeeId);
     SalaryDto updateSalary(SalaryDto salaryDto, Long employeeId);
     List<SalaryDto> findAll();
+    SalaryDto findSalaryByEmail(String email);
 }

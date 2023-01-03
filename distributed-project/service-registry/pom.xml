@@ -12,7 +12,6 @@
 	<artifactId>service-registry</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>service-registry</name>
-	<description>Demo project for Spring Boot service-registry</description>
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud.version>2021.0.4</spring-cloud.version>
@@ -53,7 +52,8 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<image>
-						<name>kristen45/${project.artifactId}</name>					</image>
+						<name>kristen45/${project.artifactId}</name>
+					</image>
 				</configuration>
 			</plugin>
 		</plugins>

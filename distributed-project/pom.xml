@@ -13,7 +13,6 @@
 		<module>user-service</module>
         <module>employeeMan-service</module>
 		<module>salary-service</module>
-
     </modules>
 	
 </project>

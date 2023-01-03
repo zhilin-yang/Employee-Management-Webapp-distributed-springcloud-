@@ -5,25 +5,27 @@ const Org_API_BASE_URL = "http://localhost:9191/api/employeeman/organizations";
 
 class OrganizationService {
 
-    getOrgs(){
+    getOrgs() {
         return axios.get(Org_API_BASE_URL);
     }
-    createOrg(org){
+
+    createOrg(org) {
         return axios.post(Org_API_BASE_URL, org);
     }
 
-    getOrgById(orgId){
+    getOrgById(orgId) {
         return axios.get(Org_API_BASE_URL + '/' + orgId);
     }
 
-    updateOrg(orgDto, orgId){
-        return axios.put(Org_API_BASE_URL + '/' + orgId,orgDto);
+    updateOrg(orgDto, orgId) {
+        return axios.put(Org_API_BASE_URL + '/' + orgId, orgDto);
     }
 
-    deleteOrg(orgId){
+    deleteOrg(orgId) {
         return axios.delete(Org_API_BASE_URL + '/' + orgId);
     }
-    getOrgByCode(orgCode){
+
+    getOrgByCode(orgCode) {
         return axios.get(Org_API_BASE_URL + '/' + orgCode);
     }
 

@@ -18,25 +18,25 @@ public class SalaryController {
     private SalaryService salaryService;
 
     @GetMapping()
-    public ResponseEntity <List<SalaryDto>> getAllSalaries(){
-        List <SalaryDto> salaryListDto=salaryService.findAll();
+    public ResponseEntity<List<SalaryDto>> getAllSalaries() {
+        List<SalaryDto> salaryListDto = salaryService.findAll();
         return new ResponseEntity<>(salaryListDto, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<SalaryDto> saveSalary(@RequestBody SalaryDto salaryDto){
+    public ResponseEntity<SalaryDto> saveSalary(@RequestBody SalaryDto salaryDto) {
         SalaryDto savedSalary = salaryService.saveSalary(salaryDto);
         return new ResponseEntity<>(savedSalary, HttpStatus.CREATED);
     }
 
     @GetMapping("/{employee-id}")
-    public ResponseEntity<SalaryDto> getSalary(@PathVariable("employee-id") Long employeeId){
+    public ResponseEntity<SalaryDto> getSalary(@PathVariable("employee-id") Long employeeId) {
         SalaryDto salaryDto = salaryService.getSalaryByEmployeeId(employeeId);
         return new ResponseEntity<>(salaryDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/{employee-id}")
-    public ResponseEntity deleteSalary(@PathVariable("employee-id") Long employeeId){
+    public ResponseEntity deleteSalary(@PathVariable("employee-id") Long employeeId) {
         salaryService.deleteSalaryByEmployeeId(employeeId);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -48,14 +48,12 @@ public class SalaryController {
     }
 
     @GetMapping("/getCurrentEmp/{email}")
-    public ResponseEntity<List<SalaryDto>>  getSalaryByEmail(@PathVariable("email") String email){
-        List<SalaryDto> salaryDtoList=new ArrayList<>();
-        SalaryDto salaryDto=salaryService.findSalaryByEmail(email);
-        if(salaryDto!=null){
+    public ResponseEntity<List<SalaryDto>> getSalaryByEmail(@PathVariable("email") String email) {
+        List<SalaryDto> salaryDtoList = new ArrayList<>();
+        SalaryDto salaryDto = salaryService.findSalaryByEmail(email);
+        if (salaryDto != null) {
             salaryDtoList.add(salaryDto);
-
         }
-
         return new ResponseEntity<>(salaryDtoList, HttpStatus.OK);
     }
 }

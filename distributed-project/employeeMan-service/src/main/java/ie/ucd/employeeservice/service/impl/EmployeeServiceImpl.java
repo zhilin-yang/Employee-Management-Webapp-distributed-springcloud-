@@ -20,10 +20,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import ie.ucd.departmentservice.repository.DepartmentRepository;
 import ie.ucd.organizationservice.repository.OrganizationRepository;
 import ie.ucd.organizationservice.mapper.OrganizationMapper;
-
 
 
 @Service
@@ -35,9 +35,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeRepository employeeRepository;
     private DepartmentRepository departmentRepository;
     private OrganizationRepository organizationRepository;
-
-
-   // private RestTemplate restTemplate;
 
     @Override
     public EmployeeDto saveEmployee(EmployeeDto employeeDto) {
@@ -58,10 +55,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         LOGGER.info("inside getEmployeeById() method");
         Employee employee = employeeRepository.findById(employeeId).get();
 
-          Department department = departmentRepository.findByDepartmentCode(employee.getDepartmentCode());
-          DepartmentDto departmentDto= DepartmentMapper.mapToDepartmentDto(department);
-          Organization organization=organizationRepository.findByOrganizationCode(employee.getOrganizationCode());
-          OrganizationDto organizationDto=OrganizationMapper.mapToOrganizationDto(organization);
+        Department department = departmentRepository.findByDepartmentCode(employee.getDepartmentCode());
+        DepartmentDto departmentDto = DepartmentMapper.mapToDepartmentDto(department);
+        Organization organization = organizationRepository.findByOrganizationCode(employee.getOrganizationCode());
+        OrganizationDto organizationDto = OrganizationMapper.mapToOrganizationDto(organization);
 
         EmployeeDto employeeDto = EmployeeMapper.mapToEmployeeDto(employee);
 
@@ -71,8 +68,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         apiResponseDto.setOrganization(organizationDto);
         return apiResponseDto;
     }
+
     @Override
-    public APIResponseDto updateEmploy(Long employeeId,EmployeeDto employeeDto){
+    public APIResponseDto updateEmploy(Long employeeId, EmployeeDto employeeDto) {
         LOGGER.info("inside updateEmploy() method");
         Employee employee = employeeRepository.findById(employeeId).get();
         employee.setFirstName(employeeDto.getFirstName());
@@ -85,19 +83,20 @@ public class EmployeeServiceImpl implements EmployeeService {
         APIResponseDto apiResponseDto = new APIResponseDto();
         apiResponseDto.setEmployee(employeeDto);
         Department department = departmentRepository.findByDepartmentCode(employee.getDepartmentCode());
-        DepartmentDto departmentDto=DepartmentMapper.mapToDepartmentDto(department);
-        Organization organization=organizationRepository.findByOrganizationCode(employee.getOrganizationCode());
-        OrganizationDto organizationDto=OrganizationMapper.mapToOrganizationDto(organization);
+        DepartmentDto departmentDto = DepartmentMapper.mapToDepartmentDto(department);
+        Organization organization = organizationRepository.findByOrganizationCode(employee.getOrganizationCode());
+        OrganizationDto organizationDto = OrganizationMapper.mapToOrganizationDto(organization);
         apiResponseDto.setDepartmentDto(departmentDto);
         apiResponseDto.setOrganization(organizationDto);
         return apiResponseDto;
     }
+
     @Override
     public List<EmployeeDto> findAll() {
-        List<Employee> empListEn=new ArrayList<>();
-        List<EmployeeDto> empListDto=new ArrayList<>();
-        empListEn=employeeRepository.findAll();
-        for(int i=0;i<empListEn.size();i++){
+        List<Employee> empListEn = new ArrayList<>();
+        List<EmployeeDto> empListDto = new ArrayList<>();
+        empListEn = employeeRepository.findAll();
+        for (int i = 0; i < empListEn.size(); i++) {
             empListDto.add(EmployeeMapper.mapToEmployeeDto(empListEn.get(i)));
 
         }
@@ -122,6 +121,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         apiResponseDto.setDepartmentDto(departmentDto);
         return apiResponseDto;
     }
+
     @Override
     public String deleteEmploy(Long employeeId) {
 
@@ -135,28 +135,24 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<EmployeeDto> findAllByFirstName(String firstNameLike) {
-        List<Employee> empListEn=new ArrayList<>();
-        List<EmployeeDto> empListDto=new ArrayList<>();
-        empListEn=employeeRepository.findByFirstNameLike(firstNameLike);
-        for(int i=0;i<empListEn.size();i++){
+        List<Employee> empListEn = new ArrayList<>();
+        List<EmployeeDto> empListDto = new ArrayList<>();
+        empListEn = employeeRepository.findByFirstNameLike(firstNameLike);
+        for (int i = 0; i < empListEn.size(); i++) {
             empListDto.add(EmployeeMapper.mapToEmployeeDto(empListEn.get(i)));
 
         }
         return empListDto;
-
     }
 
     @Override
     public EmployeeDto getEmployeeByEmail(String email) {
-        Employee emp=employeeRepository.findByEmail(email);
-        if(emp!=null){
-            EmployeeDto empDto=EmployeeMapper.mapToEmployeeDto(emp);
+        Employee emp = employeeRepository.findByEmail(email);
+        if (emp != null) {
+            EmployeeDto empDto = EmployeeMapper.mapToEmployeeDto(emp);
             return empDto;
-        }else{
+        } else {
             return null;
         }
-
-
     }
-
 }

@@ -5,7 +5,6 @@ import ie.ucd.userservice.mapper.UserMapper;
 import lombok.AllArgsConstructor;
 import ie.ucd.userservice.dto.UserDto;
 import ie.ucd.userservice.repository.UserRepository;
-import ie.ucd.userservice.service.APIClient;
 import ie.ucd.userservice.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +19,10 @@ public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
 
-   // private RestTemplate restTemplate;
-    private WebClient webClient;
-    private APIClient apiClient;
-
-
     @Override
     public UserDto getUserByUP(UserDto userDto) {
 
-        return UserMapper.mapToUserDto(checkPassword(userDto.getEmail(),userDto.getPassword()));
+        return UserMapper.mapToUserDto(checkPassword(userDto.getEmail(), userDto.getPassword()));
     }
 
     @Override
@@ -62,6 +56,4 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmailAndPassword(username, password);
         return user;
     }
-
-
 }

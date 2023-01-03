@@ -12,19 +12,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableEurekaClient
 public class UserServiceApplication {
 
-//	@Bean
-//	@LoadBalanced
-//	public RestTemplate restTemplate(){
-//		return new RestTemplate();
-//	}
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder().build();
+    }
 
-	@Bean
-	public WebClient webClient(){
-		return WebClient.builder().build();
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(UserServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(UserServiceApplication.class, args);
+    }
 
 }

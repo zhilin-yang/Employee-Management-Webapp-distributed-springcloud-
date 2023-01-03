@@ -12,9 +12,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 public class SalaryServiceApplication {
 
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		SpringApplication.run(SalaryServiceApplication.class, args);
-	}
+        SpringApplication.run(SalaryServiceApplication.class, args);
+    }
 
 }

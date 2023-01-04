@@ -51,11 +51,11 @@ class EmployeeControllerTest {
         JSONObject jsonObject = new JSONObject();
         //jsonObject.put("id", "3");
 
-        jsonObject.put("firstName", "Jack");
+        jsonObject.put("firstName", "John");
         jsonObject.put("lastName", "Smith");
-        jsonObject.put("email", "1234@gmail.com");
-        jsonObject.put("departmentCode", "MKT001");
-        jsonObject.put("organizationCode", "MKT");
+        jsonObject.put("email", "admin@gmail.com");
+        jsonObject.put("departmentCode", "HR001");
+        jsonObject.put("organizationCode", "HR");
         String json = jsonObject.toJSONString();
 
         this.mockMvc.perform(post("/api/employeeman/employees")
@@ -64,11 +64,11 @@ class EmployeeControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.firstName").value("Jack"))
+                .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Smith"))
-                .andExpect(jsonPath("$.email").value("1234@gmail.com"))
-                .andExpect(jsonPath("$.departmentCode").value("MKT001"))
-                .andExpect(jsonPath("$.organizationCode").value("MKT"))
+                .andExpect(jsonPath("$.email").value("admin@gmail.com"))
+                .andExpect(jsonPath("$.departmentCode").value("HR001"))
+                .andExpect(jsonPath("$.organizationCode").value("HR"))
                 .andReturn();
 
     }

@@ -20,19 +20,18 @@ class EmployeeServiceImplTest {
     @Test
     @Order(1)
     void saveEmployee() {
-        //EmployeeDto employeeDto = new EmployeeDto(null, "Jack", "Smith", "abcd@gmail.com", "MKT001", "MKT");
         EmployeeDto employeeDto = new EmployeeDto();
-        employeeDto.setFirstName("Jack");
+        employeeDto.setFirstName("John");
         employeeDto.setLastName("Smith");
-        employeeDto.setEmail("abcd@gmail.com");
-        employeeDto.setOrganizationCode("MKT");
-        employeeDto.setDepartmentCode("MKT001");
+        employeeDto.setEmail("admin@gmail.com");
+        employeeDto.setOrganizationCode("HR");
+        employeeDto.setDepartmentCode("HR001");
         EmployeeDto savedEmployee = this.employeeServiceImpl.saveEmployee(employeeDto);
-        Assertions.assertEquals("Jack", savedEmployee.getFirstName());
+        Assertions.assertEquals("John", savedEmployee.getFirstName());
         Assertions.assertEquals("Smith", savedEmployee.getLastName());
-        Assertions.assertEquals("abcd@gmail.com", savedEmployee.getEmail());
-        Assertions.assertEquals("MKT001", savedEmployee.getDepartmentCode());
-        Assertions.assertEquals("MKT", savedEmployee.getOrganizationCode());
+        Assertions.assertEquals("admin@gmail.com", savedEmployee.getEmail());
+        Assertions.assertEquals("HR001", savedEmployee.getDepartmentCode());
+        Assertions.assertEquals("HR", savedEmployee.getOrganizationCode());
     }
 
     @Test

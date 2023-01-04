@@ -1,5 +1,6 @@
 # Microservices with Spring Cloud 
-In this project I'm demonstrating you the most interesting features of [Spring Cloud Project](https://spring.io/projects/spring-cloud) for building microservice-based architecture.
+Video[demo](https://drive.google.com/file/d/1b6caDbK4_kTz51xVr1h77Jb3D7NL1KnN/view?usp=sharing) 
+Video[architecture](https://drive.google.com/file/d/1y10ZdWjItVAnzWC8hqi5O5cdl221SERl/view?usp=sharing) 
 
 
 ## Architecture
@@ -12,4 +13,3 @@ Our project consists of the following modules:
 - **department-service** - a module containing the second of our sample microservices that allows to perform CRUD operation on  departments. It communicates with employee-service. 
 - **organization-service** - a module containing the third of our sample microservices that allows to perform CRUD operation on organizations. It communicates with both employee-service and department-service.
 
-The following picture illustrates the architecture described above.

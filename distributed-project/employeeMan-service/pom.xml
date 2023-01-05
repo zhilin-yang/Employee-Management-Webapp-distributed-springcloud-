@@ -118,7 +118,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>kristen45/${project.artifactId}</name>
+                        <name>kristen45/employeeman-service</name>
                     </image>
                     <excludes>
                         <exclude>

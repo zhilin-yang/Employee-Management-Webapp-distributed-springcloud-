@@ -10,9 +10,9 @@
     </parent>
     <groupId>ie.ucd</groupId>
     <modelVersion>4.0.0</modelVersion>
-    <name>employeeMan-service</name>
-    <artifactId>employeeMan-service</artifactId>
-    <description>Spring Boot project as employeeMan-service</description>
+    <name>employeeman-service</name>
+    <artifactId>employeeman-service</artifactId>
+    <description>Spring Boot project as employeeman-service</description>
     <properties>
         <java.version>17</java.version>
         <spring-cloud.version>2021.0.4</spring-cloud.version>
@@ -97,6 +97,7 @@
             <artifactId>springdoc-openapi-ui</artifactId>
             <version>1.6.3</version>
         </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -118,7 +119,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <image>
-                        <name>kristen45/employeeman-service</name>
+                        <name>kristen45/${project.artifactId}</name>
                     </image>
                     <excludes>
                         <exclude>

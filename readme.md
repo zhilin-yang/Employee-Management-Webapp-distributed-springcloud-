@@ -5,6 +5,7 @@ demo Video[demo](https://drive.google.com/file/d/1b6caDbK4_kTz51xVr1h77Jb3D7NL1K
 
 
 ## Architecture
+image.png
 
 Our project consists of the following modules:
 - **gateway-service** - a module that Spring Cloud Gateway for running Spring Boot application that acts as a proxy/gateway in our architecture.

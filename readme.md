@@ -18,12 +18,12 @@ Our project consists of the following modules:
 
 ### Running via docker-compose
 
-First, from the root of the repository, install all dependencies and build the jars with maven:
+First, go to the root of the repository:
 ```
-mvn clean install
+cd distributed-project
 ```
 
-Then you can build the docker images and finally, run them:
+Then you can pull the docker images and finally, run them:
 ```
 docker-compose up
 ```

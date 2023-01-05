@@ -41,5 +41,11 @@ cd react-frontend
 npm install
 npm start
 ```
-The frontend should be looking something like this:
-![Front Page](front-page.jpg)
+The frontend should be looking something like this, click login to and enter the following email and password:
+![img.png](img.png)
+```
+admin@gmail.com 
+123456
+```
+You should be able to see employee management service, salary management service and user service.
+![img_1.png](img_1.png)

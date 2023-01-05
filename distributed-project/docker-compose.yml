@@ -10,6 +10,13 @@ services:
     networks:
       - microservices-app-network
 
+  RabbitMQ:
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+    networks:
+      - microservices-app-network
+
   config-server:
     image: kristen45/config-server:latest
     #mem_limit: 700m
@@ -21,8 +28,9 @@ services:
       - zipkin
     environment:
       #default
-      SPRING_PROFILES_ACTIVE: native
+      SPRING_PROFILES_ACTIVE: default
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
 
   service-registry:
     image: kristen45/service-registry:latest
@@ -40,34 +48,15 @@ services:
         max_attempts: 3
         window: 120s
     environment:
-      SPRING_PROFILES_ACTIVE: native
+      #SPRING_PROFILES_ACTIVE: native
+      SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: optional:config-server:http://config-server:8888/
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      eureka.instance.hostname: service-registry
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka
 
-  department-service:
-    image: kristen45/department-service:latest
-    #mem_limit: 700m
-    ports:
-      - "8080:8080"
-    networks:
-      - microservices-app-network
-    depends_on:
-      - config-server
-      - service-registry
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 30s
-        max_attempts: 3
-        window: 120s
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_CONFIG_IMPORT: optional:config-server:http://config-server:8888/
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka/
-      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
-
-  employee-service:
-    image: kristen45/employee-service:latest
+  employeeman-service:
+    image: kristen45/employeeman-service:latest
     #mem_limit: 700m
     ports:
       - "8081:8081"
@@ -83,16 +72,17 @@ services:
         max_attempts: 3
         window: 120s
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      #SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: optional:config-server:http://config-server:8888/
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka/
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka
 
-  organization-service:
-    image: kristen45/organization-service:latest
+  salary-service:
+    image: kristen45/salary-service:latest
     #mem_limit: 700m
     ports:
-      - "8083:8083"
+      - "8085:8085"
     networks:
       - microservices-app-network
     depends_on:
@@ -105,24 +95,50 @@ services:
         max_attempts: 3
         window: 120s
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      #SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: optional:config-server:http://config-server:8888/
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka/
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
 
-  api-gateway:
-    image: kristen45/api-gateway:latest
+  user-service:
+    image: kristen45/user-service:latest
     #mem_limit: 700m
     ports:
-      - "8072:8072"
+      - "8084:8084"
     networks:
       - microservices-app-network
     depends_on:
       - config-server
       - service-registry
-      - organization-service
-      - employee-service
-      - department-service
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+    environment:
+      #SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: optional:config-server:http://config-server:8888/
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
+
+  api-gateway:
+    image: kristen45/api-gateway:latest
+    #mem_limit: 700m
+    ports:
+      - "9191:9191"
+    networks:
+      - microservices-app-network
+    depends_on:
+      - config-server
+      - service-registry
+      - user-service
+      - salary-service
+      - employeeman-service
     deploy:
       restart_policy:
         condition: on-failure
@@ -130,10 +146,12 @@ services:
         max_attempts: 3
         window: 180s
     environment:
-      SPRING_PROFILES_ACTIVE: prod
+      #SPRING_PROFILES_ACTIVE: prod
+      SPRING_PROFILES_ACTIVE: default
       SPRING_CONFIG_IMPORT: optional:config-server:http://config-server:8888/
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://localhost:8761/eureka/
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
 
 networks:
   microservices-app-network:

@@ -1,0 +1,1404 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  ApigatewayService:
+    DependsOn:
+      - ApigatewayTCP9191Listener
+      - ConfigserverService
+      - ServiceregistryService
+      - UserserviceService
+      - SalaryserviceService
+      - EmployeemanserviceService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: api-gateway
+          ContainerPort: 9191
+          TargetGroupArn:
+            Ref: ApigatewayTCP9191TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - ApigatewayServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: api-gateway
+      TaskDefinition:
+        Ref: ApigatewayTaskDefinition
+    Type: AWS::ECS::Service
+  ApigatewayServiceDiscoveryEntry:
+    Properties:
+      Description: '"api-gateway" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: api-gateway
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  ApigatewayTCP9191Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: ApigatewayTCP9191TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 9191
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  ApigatewayTCP9191TargetGroup:
+    Properties:
+      Port: 9191
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  ApigatewayTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: Apigateway_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: Apigateway_ResolvConf_InitContainer
+          Environment:
+            - Name: SPRING_CONFIG_IMPORT
+              Value: optional:config-server:http://config-server:8888/
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: default
+            - Name: SPRING_ZIPKIN_BASEURL
+              Value: http://zipkin:9411/
+            - Name: eureka.client.serviceUrl.defaultZone
+              Value: http://service-registry:8761/eureka/
+          Essential: true
+          Image: docker.io/kristen45/api-gateway:latest@sha256:d18d00834e6ab214a70789ec07321fefce840e9d50d7db6bf3ea80ec604e7423
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: api-gateway
+          PortMappings:
+            - ContainerPort: 9191
+              HostPort: 9191
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: ApigatewayTaskExecutionRole
+      Family: distributed-project-api-gateway
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  ApigatewayTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: api-gateway
+    Type: AWS::IAM::Role
+  CloudMap:
+    Properties:
+      Description: Service Map for Docker Compose project distributed-project
+      Name: distributed-project.local
+      Vpc: vpc-0708c00dcb748667f
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+  Cluster:
+    Properties:
+      ClusterName: distributed-project
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+    Type: AWS::ECS::Cluster
+  ConfigserverService:
+    DependsOn:
+      - ConfigserverTCP8888Listener
+      - ZipkinService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: config-server
+          ContainerPort: 8888
+          TargetGroupArn:
+            Ref: ConfigserverTCP8888TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - ConfigserverServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: config-server
+      TaskDefinition:
+        Ref: ConfigserverTaskDefinition
+    Type: AWS::ECS::Service
+  ConfigserverServiceDiscoveryEntry:
+    Properties:
+      Description: '"config-server" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: config-server
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  ConfigserverTCP8888Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: ConfigserverTCP8888TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8888
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  ConfigserverTCP8888TargetGroup:
+    Properties:
+      Port: 8888
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  ConfigserverTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: Configserver_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: Configserver_ResolvConf_InitContainer
+          Environment:
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: default
+            - Name: SPRING_ZIPKIN_BASEURL
+              Value: http://zipkin:9411/
+            - Name: eureka.client.serviceUrl.defaultZone
+              Value: http://service-registry:8761/eureka/
+          Essential: true
+          Image: docker.io/kristen45/config-server:latest@sha256:f50b27a73c5ac2bb0a7d5825ef835eb39c973a2debf520abe74d46f1aeb39088
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: config-server
+          PortMappings:
+            - ContainerPort: 8888
+              HostPort: 8888
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: ConfigserverTaskExecutionRole
+      Family: distributed-project-config-server
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  ConfigserverTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: config-server
+    Type: AWS::IAM::Role
+  EmployeemanserviceService:
+    DependsOn:
+      - EmployeemanserviceTCP8081Listener
+      - ConfigserverService
+      - ServiceregistryService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: employeeman-service
+          ContainerPort: 8081
+          TargetGroupArn:
+            Ref: EmployeemanserviceTCP8081TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - EmployeemanserviceServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: employeeman-service
+      TaskDefinition:
+        Ref: EmployeemanserviceTaskDefinition
+    Type: AWS::ECS::Service
+  EmployeemanserviceServiceDiscoveryEntry:
+    Properties:
+      Description: '"employeeman-service" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: employeeman-service
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  EmployeemanserviceTCP8081Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: EmployeemanserviceTCP8081TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8081
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  EmployeemanserviceTCP8081TargetGroup:
+    Properties:
+      Port: 8081
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  EmployeemanserviceTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: Employeemanservice_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: Employeemanservice_ResolvConf_InitContainer
+          Environment:
+            - Name: SPRING_CONFIG_IMPORT
+              Value: optional:config-server:http://config-server:8888/
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: default
+            - Name: SPRING_ZIPKIN_BASEURL
+              Value: http://zipkin:9411/
+            - Name: eureka.client.serviceUrl.defaultZone
+              Value: http://service-registry:8761/eureka
+          Essential: true
+          Image: docker.io/kristen45/employeeman-service:latest@sha256:74948527710c02c599e5f38b9c2acf9a8b524a17e12839363906baa75360b091
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: employeeman-service
+          PortMappings:
+            - ContainerPort: 8081
+              HostPort: 8081
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: EmployeemanserviceTaskExecutionRole
+      Family: distributed-project-employeeman-service
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  EmployeemanserviceTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: employeeman-service
+    Type: AWS::IAM::Role
+  LoadBalancer:
+    Properties:
+      LoadBalancerAttributes:
+        - Key: load_balancing.cross_zone.enabled
+          Value: "true"
+      Scheme: internet-facing
+      Subnets:
+        - subnet-02547b4c7d2bc49a5
+        - subnet-02a6021ff38158560
+        - subnet-0f153b04783552984
+        - subnet-09649c0e0b3a2f9cb
+        - subnet-058a67f09b8ac4751
+        - subnet-04a114146fc321731
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      Type: network
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  LogGroup:
+    Properties:
+      LogGroupName: /docker-compose/distributed-project
+    Type: AWS::Logs::LogGroup
+  Microservicesappnetwork5672Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: RabbitMQ:5672/tcp on microservices-app-network network
+      FromPort: 5672
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 5672
+    Type: AWS::EC2::SecurityGroupIngress
+  Microservicesappnetwork8081Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: employeeman-service:8081/tcp on microservices-app-network network
+      FromPort: 8081
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 8081
+    Type: AWS::EC2::SecurityGroupIngress
+  Microservicesappnetwork8084Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: user-service:8084/tcp on microservices-app-network network
+      FromPort: 8084
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 8084
+    Type: AWS::EC2::SecurityGroupIngress
+  Microservicesappnetwork8085Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: salary-service:8085/tcp on microservices-app-network network
+      FromPort: 8085
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 8085
+    Type: AWS::EC2::SecurityGroupIngress
+  Microservicesappnetwork8761Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: service-registry:8761/tcp on microservices-app-network network
+      FromPort: 8761
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 8761
+    Type: AWS::EC2::SecurityGroupIngress
+  Microservicesappnetwork8888Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: config-server:8888/tcp on microservices-app-network network
+      FromPort: 8888
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 8888
+    Type: AWS::EC2::SecurityGroupIngress
+  Microservicesappnetwork9191Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: api-gateway:9191/tcp on microservices-app-network network
+      FromPort: 9191
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 9191
+    Type: AWS::EC2::SecurityGroupIngress
+  Microservicesappnetwork9411Ingress:
+    Properties:
+      CidrIp: 0.0.0.0/0
+      Description: zipkin:9411/tcp on microservices-app-network network
+      FromPort: 9411
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: TCP
+      ToPort: 9411
+    Type: AWS::EC2::SecurityGroupIngress
+  MicroservicesappnetworkNetwork:
+    Properties:
+      GroupDescription: distributed-project Security Group for microservices-app-network
+        network
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.network
+          Value: distributed-project_microservices-app-network
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::EC2::SecurityGroup
+  MicroservicesappnetworkNetworkIngress:
+    Properties:
+      Description: Allow communication within network microservices-app-network
+      GroupId:
+        Ref: MicroservicesappnetworkNetwork
+      IpProtocol: "-1"
+      SourceSecurityGroupId:
+        Ref: MicroservicesappnetworkNetwork
+    Type: AWS::EC2::SecurityGroupIngress
+  RabbitMQService:
+    DependsOn:
+      - RabbitMQTCP5672Listener
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: RabbitMQ
+          ContainerPort: 5672
+          TargetGroupArn:
+            Ref: RabbitMQTCP5672TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - RabbitMQServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: RabbitMQ
+      TaskDefinition:
+        Ref: RabbitMQTaskDefinition
+    Type: AWS::ECS::Service
+  RabbitMQServiceDiscoveryEntry:
+    Properties:
+      Description: '"RabbitMQ" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: RabbitMQ
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  RabbitMQTCP5672Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: RabbitMQTCP5672TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 5672
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  RabbitMQTCP5672TargetGroup:
+    Properties:
+      Port: 5672
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  RabbitMQTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: RabbitMQ_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: RabbitMQ_ResolvConf_InitContainer
+          Essential: true
+          Image: docker.io/library/rabbitmq:latest@sha256:529bd70467c60aca125a854b29248e61a71a5072085b4668d357d339858cc6d1
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: RabbitMQ
+          PortMappings:
+            - ContainerPort: 5672
+              HostPort: 5672
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: RabbitMQTaskExecutionRole
+      Family: distributed-project-RabbitMQ
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  RabbitMQTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: RabbitMQ
+    Type: AWS::IAM::Role
+  SalaryserviceService:
+    DependsOn:
+      - SalaryserviceTCP8085Listener
+      - ConfigserverService
+      - ServiceregistryService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: salary-service
+          ContainerPort: 8085
+          TargetGroupArn:
+            Ref: SalaryserviceTCP8085TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - SalaryserviceServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: salary-service
+      TaskDefinition:
+        Ref: SalaryserviceTaskDefinition
+    Type: AWS::ECS::Service
+  SalaryserviceServiceDiscoveryEntry:
+    Properties:
+      Description: '"salary-service" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: salary-service
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  SalaryserviceTCP8085Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: SalaryserviceTCP8085TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8085
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  SalaryserviceTCP8085TargetGroup:
+    Properties:
+      Port: 8085
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  SalaryserviceTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: Salaryservice_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: Salaryservice_ResolvConf_InitContainer
+          Environment:
+            - Name: SPRING_CONFIG_IMPORT
+              Value: optional:config-server:http://config-server:8888/
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: default
+            - Name: SPRING_ZIPKIN_BASEURL
+              Value: http://zipkin:9411/
+            - Name: eureka.client.serviceUrl.defaultZone
+              Value: http://service-registry:8761/eureka/
+          Essential: true
+          Image: docker.io/kristen45/salary-service:latest@sha256:239fca32658aa3726ca82aec67683244dc4c2e1016071dea695062abf3648ecc
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: salary-service
+          PortMappings:
+            - ContainerPort: 8085
+              HostPort: 8085
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: SalaryserviceTaskExecutionRole
+      Family: distributed-project-salary-service
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  SalaryserviceTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: salary-service
+    Type: AWS::IAM::Role
+  ServiceregistryService:
+    DependsOn:
+      - ServiceregistryTCP8761Listener
+      - ConfigserverService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: service-registry
+          ContainerPort: 8761
+          TargetGroupArn:
+            Ref: ServiceregistryTCP8761TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - ServiceregistryServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: service-registry
+      TaskDefinition:
+        Ref: ServiceregistryTaskDefinition
+    Type: AWS::ECS::Service
+  ServiceregistryServiceDiscoveryEntry:
+    Properties:
+      Description: '"service-registry" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: service-registry
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  ServiceregistryTCP8761Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: ServiceregistryTCP8761TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8761
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  ServiceregistryTCP8761TargetGroup:
+    Properties:
+      Port: 8761
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  ServiceregistryTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: Serviceregistry_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: Serviceregistry_ResolvConf_InitContainer
+          Environment:
+            - Name: SPRING_CONFIG_IMPORT
+              Value: optional:config-server:http://config-server:8888/
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: default
+            - Name: SPRING_ZIPKIN_BASEURL
+              Value: http://zipkin:9411/
+            - Name: eureka.client.serviceUrl.defaultZone
+              Value: http://service-registry:8761/eureka
+            - Name: eureka.instance.hostname
+              Value: service-registry
+          Essential: true
+          Image: docker.io/kristen45/service-registry:latest@sha256:fa7344172f1568465dc4a1b91dfcc4a7264acd3ffc417ba2ae8dd8ef9b83ed76
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: service-registry
+          PortMappings:
+            - ContainerPort: 8761
+              HostPort: 8761
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: ServiceregistryTaskExecutionRole
+      Family: distributed-project-service-registry
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  ServiceregistryTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: service-registry
+    Type: AWS::IAM::Role
+  UserserviceService:
+    DependsOn:
+      - UserserviceTCP8084Listener
+      - ConfigserverService
+      - ServiceregistryService
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: user-service
+          ContainerPort: 8084
+          TargetGroupArn:
+            Ref: UserserviceTCP8084TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - UserserviceServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: user-service
+      TaskDefinition:
+        Ref: UserserviceTaskDefinition
+    Type: AWS::ECS::Service
+  UserserviceServiceDiscoveryEntry:
+    Properties:
+      Description: '"user-service" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: user-service
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  UserserviceTCP8084Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: UserserviceTCP8084TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 8084
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  UserserviceTCP8084TargetGroup:
+    Properties:
+      Port: 8084
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  UserserviceTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: Userservice_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: Userservice_ResolvConf_InitContainer
+          Environment:
+            - Name: SPRING_CONFIG_IMPORT
+              Value: optional:config-server:http://config-server:8888/
+            - Name: SPRING_PROFILES_ACTIVE
+              Value: default
+            - Name: SPRING_ZIPKIN_BASEURL
+              Value: http://zipkin:9411/
+            - Name: eureka.client.serviceUrl.defaultZone
+              Value: http://service-registry:8761/eureka/
+          Essential: true
+          Image: docker.io/kristen45/user-service:latest@sha256:9fd0ed1bf7c5c77d0475a8b58aeec2a5241b94d4956d45a55d1af03c5542278c
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: user-service
+          PortMappings:
+            - ContainerPort: 8084
+              HostPort: 8084
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: UserserviceTaskExecutionRole
+      Family: distributed-project-user-service
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  UserserviceTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: user-service
+    Type: AWS::IAM::Role
+  ZipkinService:
+    DependsOn:
+      - ZipkinTCP9411Listener
+    Properties:
+      Cluster:
+        Fn::GetAtt:
+          - Cluster
+          - Arn
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      DeploymentController:
+        Type: ECS
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: zipkin
+          ContainerPort: 9411
+          TargetGroupArn:
+            Ref: ZipkinTCP9411TargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          SecurityGroups:
+            - Ref: MicroservicesappnetworkNetwork
+          Subnets:
+            - subnet-02547b4c7d2bc49a5
+            - subnet-02a6021ff38158560
+            - subnet-0f153b04783552984
+            - subnet-09649c0e0b3a2f9cb
+            - subnet-058a67f09b8ac4751
+            - subnet-04a114146fc321731
+      PlatformVersion: 1.4.0
+      PropagateTags: SERVICE
+      SchedulingStrategy: REPLICA
+      ServiceRegistries:
+        - RegistryArn:
+            Fn::GetAtt:
+              - ZipkinServiceDiscoveryEntry
+              - Arn
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: zipkin
+      TaskDefinition:
+        Ref: ZipkinTaskDefinition
+    Type: AWS::ECS::Service
+  ZipkinServiceDiscoveryEntry:
+    Properties:
+      Description: '"zipkin" service discovery entry in Cloud Map'
+      DnsConfig:
+        DnsRecords:
+          - TTL: 60
+            Type: A
+        RoutingPolicy: MULTIVALUE
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+      Name: zipkin
+      NamespaceId:
+        Ref: CloudMap
+    Type: AWS::ServiceDiscovery::Service
+  ZipkinTCP9411Listener:
+    Properties:
+      DefaultActions:
+        - ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn:
+                  Ref: ZipkinTCP9411TargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: LoadBalancer
+      Port: 9411
+      Protocol: TCP
+    Type: AWS::ElasticLoadBalancingV2::Listener
+  ZipkinTCP9411TargetGroup:
+    Properties:
+      Port: 9411
+      Protocol: TCP
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+      TargetType: ip
+      VpcId: vpc-0708c00dcb748667f
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  ZipkinTaskDefinition:
+    Properties:
+      ContainerDefinitions:
+        - Command:
+            - us-east-1.compute.internal
+            - distributed-project.local
+          Essential: false
+          Image: docker/ecs-searchdomain-sidecar:1.0
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: Zipkin_ResolvConf_InitContainer
+        - DependsOn:
+            - Condition: SUCCESS
+              ContainerName: Zipkin_ResolvConf_InitContainer
+          Essential: true
+          Image: docker.io/openzipkin/zipkin:latest@sha256:f1573c1b40da38a751a6aa5f8ae0d7b1d6d567e60aace990c4413a3292ba2ba1
+          LinuxParameters: {}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group:
+                Ref: LogGroup
+              awslogs-region:
+                Ref: AWS::Region
+              awslogs-stream-prefix: distributed-project
+          Name: zipkin
+          PortMappings:
+            - ContainerPort: 9411
+              HostPort: 9411
+              Protocol: tcp
+      Cpu: "256"
+      ExecutionRoleArn:
+        Ref: ZipkinTaskExecutionRole
+      Family: distributed-project-zipkin
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+    Type: AWS::ECS::TaskDefinition
+  ZipkinTaskExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Condition: {}
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Tags:
+        - Key: com.docker.compose.project
+          Value: distributed-project
+        - Key: com.docker.compose.service
+          Value: zipkin
+    Type: AWS::IAM::Role

@@ -1,6 +1,14 @@
 version: "3.8"
 
 services:
+  react:
+    image: kristen45/react-frontend:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - microservices-app-network
+    stdin_open: true
+#    build: ./react-frontend
 
   zipkin:
     image: openzipkin/zipkin
@@ -9,6 +17,7 @@ services:
       - "9411:9411"
     networks:
       - microservices-app-network
+#    build: zipkin
 
   RabbitMQ:
     image: rabbitmq:latest
@@ -16,6 +25,7 @@ services:
       - "5672:5672"
     networks:
       - microservices-app-network
+
 
   config-server:
     image: kristen45/config-server:latest
@@ -31,6 +41,8 @@ services:
       SPRING_PROFILES_ACTIVE: default
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
       eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
+
+
 
   service-registry:
     image: kristen45/service-registry:latest
@@ -55,6 +67,7 @@ services:
       eureka.instance.hostname: service-registry
       eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka
 
+
   employeeman-service:
     image: kristen45/employeeman-service:latest
     #mem_limit: 700m
@@ -77,6 +90,7 @@ services:
       SPRING_CONFIG_IMPORT: optional:config-server:http://config-server:8888/
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
       eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka
+
 
   salary-service:
     image: kristen45/salary-service:latest
@@ -102,6 +116,7 @@ services:
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
       eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
 
+
   user-service:
     image: kristen45/user-service:latest
     #mem_limit: 700m
@@ -125,6 +140,7 @@ services:
 #      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
       eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
+
 
   api-gateway:
     image: kristen45/api-gateway:latest
@@ -152,6 +168,7 @@ services:
 #      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka/
       SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
       eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
+
 
 networks:
   microservices-app-network:
